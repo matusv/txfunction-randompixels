@@ -33,6 +33,8 @@ const IPFS_AUTH = '';
     const seed = Keypair.random().publicKey();
 
     const txFunctionCode = fs.readFileSync('./dist/txF-RandomPixels.js', 'utf8')
+    
+    //const result = await runIssueTicket(vm, txFunctionCode)
     const result = await runGenerateNFT(vm, txFunctionCode)
 
     console.log("XDR:\n", result)
