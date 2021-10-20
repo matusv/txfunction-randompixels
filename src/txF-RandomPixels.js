@@ -2,6 +2,11 @@
 const HORIZON_URL = 'https://horizon-testnet.stellar.org'
 const STELLAR_NETWORK = 'TESTNET'
 
+import util from 'util'
+
+global.TextEncoder = util.TextEncoder
+global.TextDecoder = util.TextDecoder
+
 import { TransactionBuilder, Server, Networks, Operation, Asset, Keypair, StrKey } from 'stellar-sdk'
 import BigNumber from 'bignumber.js';
 import fetch from 'node-fetch';
@@ -11,17 +16,19 @@ import { encode } from 'fast-png';
 //import https from "https"
 // import { FormDataEncoder } from "form-data-encoder"
 // import {blobFrom} from "fetch-blob/from.js"
-import { Readable } from "stream"
+// import { Readable } from "stream"
 // //import fs from 'fs';
 // import { FormData } from 'formdata-polyfill/esm.min.js'
 // import Blob from "fetch-blob"
 
 // import { ReadableStream } from "web-streams-polyfill/dist/ponyfill.js";
+// import { FormDataEncoder } from "form-data-encoder"
+// import { FormData } from "formdata-node"
+
+import { Readable } from "stream"
 import { FormDataEncoder } from "form-data-encoder"
 import { FormData } from "formdata-node"
-
-//import {FormDataEncoder} from "form-data-encoder"
-//import {FormData, File, Blob } from "formdata-node"
+// import * as FormData from 'form-data'
 
 const server = new Server(HORIZON_URL);
 const ticketIssuerPK = 'GBJSG34XIZ7W4TG6W6JSUFUZSEERG3NRTITFXZVOTMTP43NWR7CAICJG';
@@ -317,16 +324,24 @@ async function uploadFileToIpfs(file, hostIpfs, authIpfs){
         method: 'POST',
         auth: authIpfs,
         headers: encoder.headers,
-        body: Readable.from(encoder)//new Blob([...encoder], {type: encoder.contentType})//toReadableStream(encoder)//new Blob(encoder, {type: encoder.contentType})//encoder
+        body: Readable.from(encoder) // await toBlob(form) // new Blob([...encoder], {type: encoder.contentType}) // new Blob(encoder, {type: encoder.contentType}) // new Blob(encoder, {type: encoder.contentType}) // encoder.encode() // form // Readable.from(encoder)//new Blob([...encoder], {type: encoder.contentType})//toReadableStream(encoder)//new Blob(encoder, {type: encoder.contentType})//encoder
     })
-    .then(function(res) {
-        console.log(res);
-        return res.json();
-    }).then(function(json) {
-        return json
-    }).catch(function(err) {
-        throw {message: 'Upload file fetch error:\n' + err.message}
-    });
+    .then(async (res) => {
+        console.log(res)
+
+        if (res.ok)
+            return res.json()
+        else
+            throw await res.text()
+    })
+    // .then(function(res) {
+    //     console.log(res);
+    //     return res.json();
+    // }).then(function(json) {
+    //     return json
+    // }).catch(function(err) {
+    //     throw {message: 'Upload file fetch error:\n' + err.message}
+    // });
 
     return response
 };

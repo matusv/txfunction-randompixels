@@ -3,7 +3,6 @@ import babel from '@rollup/plugin-babel'
 import { terser } from 'rollup-plugin-terser'
 import cleaner from 'rollup-plugin-cleaner'
 import multiInput from 'rollup-plugin-multi-input';
-//import nodePolyfills from 'rollup-plugin-node-polyfills';
 
 export default {
   input: './src/txF-RandomPixels.js',
@@ -13,7 +12,6 @@ export default {
     exports: 'default'
   },
   plugins: [
-    //nodePolyfills(),
     cleaner({
       targets: ['./dist/']
     }),
@@ -21,17 +19,15 @@ export default {
     resolve({
       preferBuiltins: true
     }),
-    babel({
-      babelHelpers: 'bundled'
+    babel({ 
+      babelHelpers: 'bundled' 
     }),
     terser(),
-
   ],
   external: [
     'lodash',
     'bignumber.js',
     'stellar-sdk',
     'node-fetch',
-    'form-data-encoder'
   ]
 }

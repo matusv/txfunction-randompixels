@@ -15,16 +15,14 @@ const IPFS_AUTH = '';
       eval: false,
       wasm: false,
       strict: true,
-      fixAsync: true,
       sandbox: {
         HORIZON_URL,
         STELLAR_NETWORK,
-        window: {}
       },
       require: {
         builtin: ['util', 'stream'],
         external: {
-          modules: ['bignumber.js', 'node-fetch', 'stellar-sdk', 'lodash', 'form-data-encoder']
+          modules: ['bignumber.js', 'node-fetch', 'stellar-sdk', 'lodash']
         },
         context: 'host',
       }
@@ -34,7 +32,7 @@ const IPFS_AUTH = '';
 
     const txFunctionCode = fs.readFileSync('./dist/txF-RandomPixels.js', 'utf8')
     
-    //const result = await runIssueTicket(vm, txFunctionCode)
+    // const result = await runIssueTicket(vm, txFunctionCode)
     const result = await runGenerateNFT(vm, txFunctionCode)
 
     console.log("XDR:\n", result)
