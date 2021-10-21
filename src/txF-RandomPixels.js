@@ -3,7 +3,6 @@ const HORIZON_URL = 'https://horizon-testnet.stellar.org'
 const STELLAR_NETWORK = 'TESTNET'
 
 import util from 'util'
-
 import { TransactionBuilder, Server, Networks, Operation, Asset, Keypair, StrKey } from 'stellar-sdk'
 import BigNumber from 'bignumber.js';
 import fetch from 'node-fetch';
