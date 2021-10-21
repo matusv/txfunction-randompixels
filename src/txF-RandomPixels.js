@@ -4,9 +4,6 @@ const STELLAR_NETWORK = 'TESTNET'
 
 import util from 'util'
 
-//global.TextEncoder = util.TextEncoder
-//global.TextDecoder = util.TextDecoder
-
 import { TransactionBuilder, Server, Networks, Operation, Asset, Keypair, StrKey } from 'stellar-sdk'
 import BigNumber from 'bignumber.js';
 import fetch from 'node-fetch';
