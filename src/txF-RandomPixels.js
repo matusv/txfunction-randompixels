@@ -324,14 +324,6 @@ async function uploadFileToIpfs(file, hostIpfs, authIpfs){
         else
             throw await res.text()
     })
-    // .then(function(res) {
-    //     console.log(res);
-    //     return res.json();
-    // }).then(function(json) {
-    //     return json
-    // }).catch(function(err) {
-    //     throw {message: 'Upload file fetch error:\n' + err.message}
-    // });
 
     return response
 };
