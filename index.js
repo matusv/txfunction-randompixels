@@ -3,7 +3,7 @@ const fs = require('fs');
 const { Keypair } = require('stellar-sdk');
 
 const IPFS_HOST = 'https://ipfs.infura.io:5001';
-const IPFS_AUTH = '1zM2qeUmjqLcYs5C1PnC7twhl8n:9070049f98c59fd8a1fd84dd226204b2';
+const IPFS_AUTH = '1zpUgZJjOIbCAtnjBHgHSeL6A6P:92760708c4d669eee886994f3c71d5cf';
 
 (async () => {
   try {
