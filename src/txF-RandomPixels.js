@@ -4,31 +4,13 @@ const STELLAR_NETWORK = 'TESTNET'
 
 import util from 'util'
 
-global.TextEncoder = util.TextEncoder
-global.TextDecoder = util.TextDecoder
+//global.TextEncoder = util.TextEncoder
+//global.TextDecoder = util.TextDecoder
 
 import { TransactionBuilder, Server, Networks, Operation, Asset, Keypair, StrKey } from 'stellar-sdk'
 import BigNumber from 'bignumber.js';
 import fetch from 'node-fetch';
 import { encode } from 'fast-png';
-
-//import { FormData, Blob } from "formdata-node"
-//import https from "https"
-// import { FormDataEncoder } from "form-data-encoder"
-// import {blobFrom} from "fetch-blob/from.js"
-// import { Readable } from "stream"
-// //import fs from 'fs';
-// import { FormData } from 'formdata-polyfill/esm.min.js'
-// import Blob from "fetch-blob"
-
-// import { ReadableStream } from "web-streams-polyfill/dist/ponyfill.js";
-// import { FormDataEncoder } from "form-data-encoder"
-// import { FormData } from "formdata-node"
-
-import { Readable } from "stream"
-import { FormDataEncoder } from "form-data-encoder"
-import { FormData } from "formdata-node"
-// import * as FormData from 'form-data'
 
 const server = new Server(HORIZON_URL);
 const ticketIssuerPK = 'GBJSG34XIZ7W4TG6W6JSUFUZSEERG3NRTITFXZVOTMTP43NWR7CAICJG';
@@ -85,7 +67,7 @@ async function issueTicket(body) {
     // as seed and manipulate the randomness. This way there's still some possibility for
     // manipulation, but much lower.
     //
-    // This is seed is used only in the 2nd part to generate the image, so better solution would be
+    // This seed is used only in the 2nd part to generate the image, so better solution would be
     // to use the transaction hash from the ticket issuance.
     if (Date.now() - timestamp > 60000)
         throw {message: 'Too slow. Run window has expired.'}
@@ -295,36 +277,48 @@ function decodeNftData(buffer) {
     return { pk, width, height, pixelPrice, timestamp };
 }
 
-// function toReadableStream(encoder) {
-//   const iterator = encoder.encode()
-//
-//   return new ReadableStream({
-//     async pull(controller) {
-//       const {value, done} = await iterator.next()
-//
-//       if (done) {
-//         return controller.close()
-//       }
-//
-//       controller.enqueue(value)
-//     }
-//   })
-// }
+const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+function createBoundary() {
+    let size = 16;
+    let res = "";
+    while (size--) {
+        res += alphabet[(Math.random() * alphabet.length) << 0];
+    }
+    return "form-data-boundary-" + res;
+}
+
+function normalize(value) {
+    return String(value).replace(/\r(?!\n)|(?<!\r)\n/g, "\r\n");
+}
+
+function createHeadersAndBody(file) {
+    const boundary = createBoundary()
+    const meta = 'Content-Disposition: form-data; name="file"';
+    const encoder = new util.TextEncoder()
+    const fstr = Buffer.from(encoder.encode(normalize(file))).toString()
+    const da = "\u000D\u000A";
+
+    const body = `--${boundary}${da}${meta}${da}${da}${fstr}${da}--${boundary}--${da}${da}`
+
+    let headers = {
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+        'Content-Length': Buffer.from(body, 'utf8').length.toString()
+    }
+
+    return { headers, body }
+}
 
 async function uploadFileToIpfs(file, hostIpfs, authIpfs){
     const urlIpfs = hostIpfs + '/api/v0/add';
-    var form = new FormData();
-    //const f = new File(file, "image.png");
-    form.append('file', file);
-    const encoder = new FormDataEncoder(form)
 
-    //console.log("headers:", encoder.headers);
+    let { headers, body } = createHeadersAndBody(file);
+    let bodyBuffer = Buffer.from(body, 'utf8');
 
     const response = await fetch(urlIpfs, {
         method: 'POST',
         auth: authIpfs,
-        headers: encoder.headers,
-        body: Readable.from(encoder) // await toBlob(form) // new Blob([...encoder], {type: encoder.contentType}) // new Blob(encoder, {type: encoder.contentType}) // new Blob(encoder, {type: encoder.contentType}) // encoder.encode() // form // Readable.from(encoder)//new Blob([...encoder], {type: encoder.contentType})//toReadableStream(encoder)//new Blob(encoder, {type: encoder.contentType})//encoder
+        headers: headers,
+        body: bodyBuffer
     })
     .then(async (res) => {
         console.log(res)

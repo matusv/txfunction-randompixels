@@ -3,7 +3,7 @@ const fs = require('fs');
 const { Keypair } = require('stellar-sdk');
 
 const IPFS_HOST = 'https://ipfs.infura.io:5001';
-const IPFS_AUTH = '';
+const IPFS_AUTH = '1zM2qeUmjqLcYs5C1PnC7twhl8n:9070049f98c59fd8a1fd84dd226204b2';
 
 (async () => {
   try {
@@ -31,7 +31,7 @@ const IPFS_AUTH = '';
     const seed = Keypair.random().publicKey();
 
     const txFunctionCode = fs.readFileSync('./dist/txF-RandomPixels.js', 'utf8')
-    
+
     // const result = await runIssueTicket(vm, txFunctionCode)
     const result = await runGenerateNFT(vm, txFunctionCode)
 
