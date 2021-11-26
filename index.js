@@ -1,9 +1,14 @@
 const { NodeVM } = require('vm2');
 const fs = require('fs');
-const { Keypair } = require('stellar-sdk');
+const { Keypair, Networks, Transaction, Server } = require('stellar-sdk');
 
 const IPFS_HOST = 'https://ipfs.infura.io:5001';
 const IPFS_AUTH = '1zpUgZJjOIbCAtnjBHgHSeL6A6P:92760708c4d669eee886994f3c71d5cf';
+
+const sourceKeypair = Keypair.fromSecret("SC6PWMNNK2CWFJRR4UYV4VCM4XZFGFDYKAOUV6JC227VE57A5VDUCZTE");
+const issuerKeypair = Keypair.fromSecret("SDF2FCVCY4OVY42ZJRT7TWGZUZ2OIZTEW6A6BD2NAIREWELOATI6HZHQ");
+const ticketsKeypair = Keypair.fromSecret("SCVM4LF7MR74VXYJPN3GARCFP5TDR4I6JVRQW6H5JS7TLUBSTHMN7PVJ");
+
 
 (async () => {
   try {
@@ -32,10 +37,22 @@ const IPFS_AUTH = '1zpUgZJjOIbCAtnjBHgHSeL6A6P:92760708c4d669eee886994f3c71d5cf'
 
     const txFunctionCode = fs.readFileSync('./dist/txF-RandomPixels.js', 'utf8')
 
-    // const result = await runIssueTicket(vm, txFunctionCode)
-    const result = await runGenerateNFT(vm, txFunctionCode)
+    let ticketTxHash = null;
+    try {
+        let issueTicketXdr = await runIssueTicket(vm, txFunctionCode)
+        ticketTxHash = await submitXDR(issueTicketXdr);
+    } catch (e) {
+        console.log(e);
+    }
 
-    console.log("XDR:\n", result)
+    //ticketTxHash = "a0c25377f04134691a46809b34af2fe8af7edd980bdcb334a3cbc9db48344a75";
+
+    console.log("");
+
+    let generateNftXdr = await runGenerateNFT(vm, txFunctionCode, ticketTxHash)
+
+    //console.log("XDR:\n", xdr)
+    await submitXDR(generateNftXdr);
   }
 
   catch(err) {
@@ -46,22 +63,46 @@ const IPFS_AUTH = '1zpUgZJjOIbCAtnjBHgHSeL6A6P:92760708c4d669eee886994f3c71d5cf'
 async function runIssueTicket(vm, txFunctionCode){
     return await vm.run(txFunctionCode, 'vm.js')({
         stage: 'issueTicket',
-        source: 'GCJ5K37ERWQK4HYBWNCRFT2HJVSMLVHHJVAISEW6CPFJ5RWCEZN44KJE',
-        width: 10,
-        height: 1,
-        pixelPrice: 1,
-        timestamp: Date.now()
+        source: sourceKeypair.publicKey(),
+        sizeIdx: 6,
+        //numColors: 3,
+        symmetryDepth: 3,
+        clean: true,
+        tip: 1,
+        expectedPrice: 21
     })
 };
 
-async function runGenerateNFT(vm, txFunctionCode){
+async function runGenerateNFT(vm, txFunctionCode, ticketTxHash){
     const seed = Keypair.random().publicKey();
 
     return await vm.run(txFunctionCode, 'vm.js')({
         stage: 'generateNFT',
-        source: 'GCJ5K37ERWQK4HYBWNCRFT2HJVSMLVHHJVAISEW6CPFJ5RWCEZN44KJE',
+        source: sourceKeypair.publicKey(),
         hostIpfs: IPFS_HOST,
         authIpfs: IPFS_AUTH,
+        ticketTxHash: ticketTxHash,
         seed: seed
     })
 };
+
+async function submitXDR(xdr) {
+    const server = new Server('https://horizon-testnet.stellar.org');
+    let tx = new Transaction(xdr, Networks.TESTNET);
+    tx.sign(sourceKeypair);
+    tx.sign(issuerKeypair);
+    tx.sign(ticketsKeypair);
+
+    try {
+        const txResult = await server.submitTransaction(tx);
+        //console.log(JSON.stringify(txResult, null, 2));
+        console.log('Success! View the transaction at: ');
+        console.log(txResult._links.transaction.href);
+
+        return txResult.hash;
+    } catch (e) {
+        console.log('An error has occured:');
+        console.log(e.response.data);
+        console.log(e.response.data.extras.result_codes);
+    }
+}
