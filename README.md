@@ -1,6 +1,6 @@
 # RandomPixels
 
-Create an randomly generated image NFT.
+Create a randomly generated image NFT.
 
 This is a POC and should provide a base for a framework to generate files, store them on IPFS and issue them as NFTs when running a `txFunction` on `stellar-turrets`.
 
