@@ -35,7 +35,7 @@ const ticketsKeypair = Keypair.fromSecret("SCVM4LF7MR74VXYJPN3GARCFP5TDR4I6JVRQW
 
     const seed = Keypair.random().publicKey();
 
-    const txFunctionCode = fs.readFileSync('./dist/txF-RandomPixels.js', 'utf8')
+    const txFunctionCode = fs.readFileSync('./dist/txF-RandomPixels-testnet.js', 'utf8')
 
     let ticketTxHash = null;
     try {
@@ -74,7 +74,7 @@ async function runIssueTicket(vm, txFunctionCode){
 };
 
 async function runGenerateNFT(vm, txFunctionCode, ticketTxHash){
-    const seed = Keypair.random().publicKey();
+    const nftIssuerSeed = Keypair.random().publicKey();
 
     return await vm.run(txFunctionCode, 'vm.js')({
         stage: 'generateNFT',
@@ -82,7 +82,7 @@ async function runGenerateNFT(vm, txFunctionCode, ticketTxHash){
         hostIpfs: IPFS_HOST,
         authIpfs: IPFS_AUTH,
         ticketTxHash: ticketTxHash,
-        seed: seed
+        nftIssuerSeed: nftIssuerSeed
     })
 };
 

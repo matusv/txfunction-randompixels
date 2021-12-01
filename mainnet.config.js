@@ -5,7 +5,7 @@ import cleaner from 'rollup-plugin-cleaner'
 import multiInput from 'rollup-plugin-multi-input';
 
 export default {
-  input: './src/txF-RandomPixels.js',
+  input: './src/txF-RandomPixels-mainnet.js',
   output: {
     dir: 'dist',
     format: 'cjs',
@@ -19,8 +19,8 @@ export default {
     resolve({
       preferBuiltins: true
     }),
-    babel({ 
-      babelHelpers: 'bundled' 
+    babel({
+      babelHelpers: 'bundled'
     }),
     terser(),
   ],

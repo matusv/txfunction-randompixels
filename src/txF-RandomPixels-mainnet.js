@@ -15,18 +15,13 @@ const feeAccountPK = 'GCTL2ZFFYQLFNTGTC27Q3GLLE5OX4UC7HDE6WW3CDPPZ6O7DTO23H543';
 const MAX_UINT_8 = Math.pow(2, 8) - 1;
 const MAX_ISSUED = 255;
 
-
 export default async (body) => {
     const { stage, source } = body;
 
-    console.log("stage:", stage);
-    console.log("source:", source);
-
-    if (
-        source === issuerPK
-        || source === ticketsPK
-        || source === feeAccountPK
-    ) throw {message: 'Invalid source account'}
+    if (source === issuerPK ||
+        source === ticketsPK ||
+        source === feeAccountPK)
+        throw {message: 'Invalid source account'}
 
     switch(stage) {
         case 'issueTicket':
@@ -37,7 +32,7 @@ export default async (body) => {
 
         default:
           throw {message: 'Invalid stage.'}
-        }
+    }
 }
 
 async function issueTicket(body) {
@@ -60,13 +55,9 @@ async function issueTicket(body) {
 
     const nftData = encodeNftData(source, sizeIdx, numColors, symmetryDepth, clean, tip);
 
-    console.log(source, sizeIdx, numColors, symmetryDepth, clean, tip);
-
     const price = computePrice(sizeIdx, numColors, symmetryDepth, clean, tip);
 
-    console.log("price:", price);
-    console.log("expectedPrice:", expectedPrice);
-
+    //2.5XLM is going to get sent to issuer because it's going to get locked in the NFT creation.
     if (price != (expectedPrice - 2.5) + "")
         throw {message: 'Invalid expected price.'}
 
@@ -77,7 +68,6 @@ async function issueTicket(body) {
     const issuerAccount = await server.loadAccount(issuerPK);
     if(typeof issuerAccount.data_attr.numIssuedAssets !== "undefined"){
         const numIssuedAssetsStr = Buffer.from(issuerAccount.data_attr.numIssuedAssets, 'base64').toString('utf-8');
-        console.log("numIssuedAssetsStr:", numIssuedAssetsStr)
         numIssuedAssets = parseInt(numIssuedAssetsStr) || 0;
     }
 
@@ -86,10 +76,7 @@ async function issueTicket(body) {
     else if (numIssuedAssets < 100) ordNumStr = "0" + numIssuedAssets;
     else  ordNumStr = "" + numIssuedAssets;
 
-
     const ticketAssetCode = 'ticket' + ordNumStr;
-    console.log("ticketAssetCode:", ticketAssetCode);
-
     const ticketAsset = new Asset(ticketAssetCode, issuerPK);
 
     if (numIssuedAssets >= MAX_ISSUED){
@@ -156,20 +143,11 @@ async function issueTicket(body) {
         source: ticketsPK
     }));
 
-    //issuer: 1XLM
-    //tickets: 1XLM
-    //numIssuedAssets: 0.5XLM
-    //ticket trustline: 0.5XLM
-    //ticket data: 0.5XLM
-    //2XLM per NFT (issuing account 1XLM + 1XLM for 2 managedata)
-
     return transaction.setTimeout(0).build().toXDR('base64');
 }
 
 async function generateNFT(body) {
-    const { source, hostIpfs, authIpfs, ticketTxHash, seed } = body
-
-    console.log("ticketTxHash:", ticketTxHash);
+    const { source, hostIpfs, authIpfs, ticketTxHash, nftIssuerSeed } = body
 
     const ticketTx = await server.transactions().transaction(ticketTxHash).call();
 
@@ -179,18 +157,11 @@ async function generateNFT(body) {
     const ticketOps = await ticketTx.operations();
     const ticketAssetCode = ticketOps.records[1].asset_code;
 
-    //console.log("ticketOps:", ticketOps);
-
     if (ticketOps.records[2].from != issuerPK || ticketOps.records[2].to != ticketsPK)
         throw {message: "Invalid issue ticket operation."}
 
     if (ticketOps.records[3].from != source || ticketOps.records[3].to != feeAccountPK)
         throw {message: "Invalid fee payment operation."}
-
-    console.log("ticketAssetCode:", ticketAssetCode);
-
-    //const ticketTxHashRaw = StrKey.decodeSha256Hash(ticketTxHash);
-    //console.log("ticketTxHashRaw:", ticketTxHashRaw);
 
     const account = await server.loadAccount(source);
     const issuerAccount = await server.loadAccount(issuerPK);
@@ -203,26 +174,18 @@ async function generateNFT(body) {
 
     const { pk, sizeIdx, numColors, symmetryDepth, clean, tip } = decodeNftData(Buffer.from(nftDataDict[ticketAssetCode], 'base64'));
 
-    const seedKeypairRawPK = Keypair.fromPublicKey(seed).rawPublicKey();
+    const seedKeypairRawPK = Keypair.fromPublicKey(nftIssuerSeed).rawPublicKey();
     const nftKeypair = Keypair.fromRawEd25519Seed(seedKeypairRawPK);
 
     const ordNumStr = ticketAssetCode.substr(-3);
     const ordNum = parseInt(ordNumStr);
-    console.log("ordNum:", ordNum);
-
     const assetCode = "RndPxls" + ordNumStr;
-
     const nftAsset = new Asset(assetCode, nftKeypair.publicKey());
-    console.log("assetCode:", assetCode);
-
     const imageSeed = Buffer.from(ticketTxHash, 'hex').slice(-4).readUInt32BE(0);
-    console.log("imageSeed:", imageSeed);
 
     const image = generateImage(ordNum, imageSeed, { sizeIdx, numColors, symmetryDepth, clean, tip });
     const response = await uploadFileToIpfs(image, hostIpfs, authIpfs);
     const ipfsHash = response.Hash;
-    console.log("https://ipfs.io/ipfs/" + ipfsHash);
-
 
     let transaction = new TransactionBuilder(issuerAccount, {
         fee,
@@ -298,8 +261,6 @@ async function generateNFT(body) {
 function computePrice(sizeIdx, numColors, symmetryDepth, clean, tip){
     let price = new BigNumber(2.5);
 
-    console.log("TYPEOF:", typeof sizeIdx);
-
     if ((typeof sizeIdx !== "undefined")) price = price.plus(5);
     if ((typeof numColors !== "undefined")) price = price.plus(5);
     if ((typeof symmetryDepth !== "undefined")) price = price.plus(5);
@@ -330,7 +291,6 @@ function encodeNftData(pk, sizeIdx, numColors, symmetryDepth, clean, tip) {
         if (!(typeof arr[i] == "undefined")){
             buffer.writeUInt8(arr[i], i + 2);
             flags += 1 << i;
-            console.log(`i: ${i}, flags: ${flags}`)
         }
     }
 
@@ -457,9 +417,6 @@ function generateShades(w, h, random){
         [1, 1, 0], [1, 0, 1], [0, 1, 1],
         [1, 1, 1]
     ][variationIdx];
-
-    console.log("variation:", variationIdx)
-    console.log("random.randomUInt(0, 1):", random.randomUInt(0, 1))
 
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
@@ -678,8 +635,6 @@ function generateImage(number, seed, userInputs) {
     }
 
     if (symmetryDepth > Math.log2(w)) symmetryDepth = Math.log2(w);
-
-    console.log(`${number}: numColors: ${numColors}, symmetryDepth: ${symmetryDepth}`)
 
     let buffer = null;
     if (typeof clean !== "undefined" && clean == 1 && w == h){
