@@ -30,18 +30,18 @@ Possible values: `[1, 1]`, `[1, 8]`, `[8, 1]`, `[8, 8]`, `[16, 16]`, `[32, 32]`,
 The chance of getting bigger sizes increases with the number of issued nfts.
 
 ### 2. Generation Technique
-- Random - completely random pixels.
-- Shades - random shades of a color. Possible colors: red, green, blue, cyan, magenta, yellow, black.
-- Gradient - gradient of n colors with random base positions.
-- Overflow - similar to gradient with a little twist which produces interesting images
-- Symmetrical - recursively creates an image by rotating a tile 4 times. At the root of the recurrency one of the previous generation techniques is chosen randomly to generate the tile. CoThe recurrency depth is chosen randomly as well. At each recurrent step a `corruption` might happen. Corruption means adding noise or shifting colors of a certain area in the image.
+- **Random** - Completely random pixels.
+- **Shades** - Random shades of a color. Possible colors: red, green, blue, cyan, magenta, yellow, black.
+- **Gradient** - Gradient of n colors with random base positions.
+- **Overflow** - Similar to gradient with a little twist which produces interesting images
+- **Symmetrical** - Recursively creates an image by rotating a tile 4 times. At the root of the recurrency one of the previous generation techniques is chosen randomly to generate the tile. CoThe recurrency depth is chosen randomly as well. At each recurrent step a `corruption` might happen. Corruption means adding noise or shifting colors of a certain area in the image.
 
 
 The size affects which generation techniques are being rolled for.
-- smaller than 8x8: random, shades
-- 8x8 - 16x16: random, shades, gradient, overflow
-- 16x16 - 32x32: gradient, overflow, symmetrical
-- bigger than 32x32: symmetrical
+- **smaller than 8x8**: random, shades
+- **8x8 - 16x16**: random, shades, gradient, overflow
+- **16x16 - 32x32**: gradient, overflow, symmetrical
+- **bigger than 32x32**: symmetrical
 
 ### 3. Number of colors
 Relevant in gradient, overflow and symmetrical generation techniques.
@@ -50,11 +50,11 @@ Relevant in gradient, overflow and symmetrical generation techniques.
 Relevant in symmetrical generation technique.
 
 ## User inputs
-- size
-- number of colors
-- symmetry depth
-- clean - this will disable the chance to get noise in corruption.
-- tip - if you want to show some ❤️ you can leave a tip.
+- **size**
+- **number of colors**
+- **symmetry depth**
+- **clean** - this will disable the chance to get noise in corruption.
+- **tip** - if you want to show some ❤️ you can leave a tip.
 
 ## 
 To run this you will need an IPFS node (Infura provides this for free up to a limit). I also provide an IPFS authentication token in the code with a small limit.
