@@ -7,7 +7,7 @@ const FormData = require('form-data');
 const HORIZON_URL = 'https://horizon-testnet.stellar.org'
 const STELLAR_NETWORK = 'TESTNET'
 
-const txFunctionFilePath = "../dist/txF-RandomPixels.js";
+const txFunctionFilePath = "../dist/txF-RandomPixels-testnet.js";
 const txFunctionFile = fs.readFileSync(txFunctionFilePath, 'utf8');
 const txFunctionSize = fs.statSync(txFunctionFilePath).size;
 
@@ -18,7 +18,7 @@ const feeAccountKeypair = Keypair.fromSecret('SCSTJAXINEIEBPXJQATERMWNBDY7G6MUAN
 const server = new Server(HORIZON_URL);
 
 const turrets = [
-    //"https://stellar-turrets-testnet.matusv.workers.dev",
+    "https://stellar-turrets-testnet.matusv.workers.dev",
     //"https://stellar-turrets-testnet.sdf-ecosystem.workers.dev",
     //"https://stellar-turrets-testnet.script3.workers.dev"
     "https://stellar-turrets-testnet.turretsdao.workers.dev"
@@ -35,7 +35,7 @@ console.log("txFunctionSize:", txFunctionSize);
         //console.log(`turrets[i].url, price: ${price}XLM`)
 
         const costResp = await uploadTxFunction(turrets[i], "")
-        console.log(turrets[i], " ,cost:", costResp.cost)
+        console.log(turrets[i], ", cost:", costResp.cost)
 
         const feeTxXdr = await getTxFunctionUploadFeeTxXdr(
             feeAccountKeypair.publicKey(),

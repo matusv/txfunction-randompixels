@@ -3,7 +3,7 @@ const { Keypair, TransactionBuilder, Server, Account, Networks, Operation } = re
 // The hashes the fee payment can apply to
 // Note - this can be empty. Then, this key can be used to run any txFunction.
 const txFunctionHashes = [
-    'ac712f359499c1f81ef939524d03b190ea193825ef5111066bda1e2096e79b8e'
+    '2b9382a10641d97478c61d7f39e63835cf9d6f1e05b41a81db400540a78258d8'
 ];
 
 const feeAccountKeypair = Keypair.fromSecret('SCSTJAXINEIEBPXJQATERMWNBDY7G6MUANGJHV33I5666TJ4Z4FJAP3C');

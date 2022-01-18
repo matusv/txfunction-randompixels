@@ -1,6 +1,6 @@
 'use strict';
-const HORIZON_URL = 'https://horizon-testnet.stellar.org'
-const STELLAR_NETWORK = 'TESTNET'
+const HORIZON_URL = 'https://horizon.stellar.org'
+const STELLAR_NETWORK = 'PUBLIC'
 
 import { TransactionBuilder, Server, Networks, Operation, Asset, Keypair, StrKey } from 'stellar-sdk'
 import BigNumber from 'bignumber.js';
@@ -8,9 +8,9 @@ import fetch from 'node-fetch';
 import { encode } from 'fast-png';
 
 const server = new Server(HORIZON_URL);
-const ticketsPK = 'GC7PTCPE7DXF3RK7HZXOJWWFWUNRAP3PTLSZWURCQFQIOYEI6PBORDHR';
-const issuerPK = 'GBNYYDEP6YP7V2UMHC3VKKUCR2QU2AID674JPKANQNKDWMG2GI6VDMYB';
-const feeAccountPK = 'GCTL2ZFFYQLFNTGTC27Q3GLLE5OX4UC7HDE6WW3CDPPZ6O7DTO23H543';
+const ticketsPK = 'GAECLTUVKN67OY2EMHSMFZZ363VGVNHENNUK5BPRAKDXQQC5J2TICKET';
+const issuerPK = 'GCXWPLMRNZFM23L4EL2TSCTLY4IPNNWSBEPB4LR25RVC3G746KISSUER';
+const feeAccountPK = 'GDEJMAEW554HAU64LXMMY4VQWJU5WUA6GROF4OTOH7U66E4JXLZMATUS';
 
 const MAX_UINT_8 = Math.pow(2, 8) - 1;
 const MAX_ISSUED = 255;
@@ -45,7 +45,7 @@ async function issueTicket(body) {
         throw {message: 'Invalid numColors.'}
 
     if ((typeof symmetryDepth !== "undefined") && (!Number.isInteger(symmetryDepth) || (symmetryDepth < 0 || symmetryDepth > MAX_UINT_8)))
-        throw {message: 'Invalid n.'}
+        throw {message: 'Invalid symmetryDepth.'}
 
     if ((typeof clean !== "undefined") && (typeof clean !== "boolean"))
         throw {message: 'Invalid clean.'}
@@ -57,8 +57,9 @@ async function issueTicket(body) {
 
     const price = computePrice(sizeIdx, numColors, symmetryDepth, clean, tip);
 
-    //2.5XLM is going to get sent to issuer because it's going to get locked in the NFT creation.
-    if (price != (expectedPrice - 2.5) + "")
+    //2.5 XLM is going to get sent to the issuer because it's going to get locked in the NFT creation.
+    const lockedAmount = 2.5;
+    if (price != (expectedPrice - lockedAmount) + "")
         throw {message: 'Invalid expected price.'}
 
     const account = await server.loadAccount(source);
@@ -236,6 +237,7 @@ async function generateNFT(body) {
 
     transaction.addOperation(Operation.setOptions({
         masterWeight: 0,
+        homeDomain: "hashbrownies.io",
         source: nftKeypair.publicKey()
     }));
 
@@ -611,8 +613,8 @@ function generateImage(number, seed, userInputs) {
     const sizes = [[1, 1], [1, 8], [8, 1], [8, 8], [16, 16], [32, 32], [64, 64], [128, 128], [256, 256], [512, 512], [1024, 1024]];
 
     if (typeof sizeIdx === "undefined"){
-        let minSizeIdx = Math.log2(number) << 0;
-        let maxSizeIdx = Math.log2(number) + 2 << 0;
+        let minSizeIdx = Math.log2(number/4) << 0;
+        let maxSizeIdx = Math.log2(number/4) + 2 << 0;
 
         if (minSizeIdx >= sizes.length) minSizeIdx = sizes.length - 1;
         if (maxSizeIdx >= sizes.length) maxSizeIdx = sizes.length - 1;

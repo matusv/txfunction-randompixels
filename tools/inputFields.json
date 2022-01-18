@@ -12,9 +12,15 @@
         "rule": "Required"
     },
     {
+        "name": "expectedPrice",
+        "type": "number",
+        "description": "Price for running this contract to make sure that the correct price is known before.",
+        "rule": "Optional"
+    },
+    {
         "name": "sizeIdx",
         "type": "number",
-        "description": "Defines the size. It's an index into the predefined sizes array.",
+        "description": "Defines the size. It's an index into the predefined array of sizes.",
         "rule": "Optional"
     },
     {
@@ -60,9 +66,9 @@
         "rule": "Optional"
     },
     {
-        "name": "seed",
+        "name": "nftIssuerSeed",
         "type": "string",
-        "description": "Seed for the NFT issuer account.",
+        "description": "Public key to seed the NFT issuer account (not a secret seed/key).",
         "rule": "Optional"
     }
 ]

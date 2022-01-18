@@ -8,6 +8,9 @@ const creatorKeypair = Keypair.fromSecret("SCF4V6GFT2IK57S57YYYQHE4VO4O5N2N333Q5
 const issuerKeypair = Keypair.random();
 const ticketsKeypair = Keypair.random();
 
+//const ticketsKeypair = Keypair.fromSecret("SDLE45BGYB7U6SG23CUQDSXJDKESNDLIEAEO7TC4BDYSPU2X5FF4RP4M");
+//const issuerKeypair = Keypair.fromSecret("SCT4XB4PJ2TWMF7N3HVVLFWO7VMMZVNFQFHZJ6L6QK4IO56523GEMDER");
+
 console.log(`Issuer:\npublic: ${issuerKeypair.publicKey()}\nsecret: ${issuerKeypair.secret()}`);
 console.log(`Tickets:\npublic: ${ticketsKeypair.publicKey()}\nsecret: ${ticketsKeypair.secret()}`);
 
