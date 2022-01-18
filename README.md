@@ -36,6 +36,7 @@ The chance of getting bigger sizes increases with the number of issued nfts.
 - Overflow - similar to gradient with a little twist which produces interesting images
 - Symmetrical - recursively creates an image by rotating a tile 4 times. At the root of the recurrency one of the previous generation techniques is chosen randomly to generate the tile. CoThe recurrency depth is chosen randomly as well. At each recurrent step a `corruption` might happen. Corruption means adding noise or shifting colors of a certain area in the image.
 
+
 The size affects which generation techniques are being rolled for.
 - smaller than 8x8: random, shades
 - 8x8 - 16x16: random, shades, gradient, overflow
