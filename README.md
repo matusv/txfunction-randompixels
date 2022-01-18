@@ -4,6 +4,12 @@ Create randomly generated image NFTs.
 
 This concept might get reused for any file type.
 
+Each NFT created by this contract is going to lock 2.5 XLM in reserves.
+- NFT issuer account creation - 1 XLM
+- ipfs hash stored in the NFT issuer account - 0.5 XLM
+- data to regenerate image stored in the NFT issuer account - 0.5 XLM
+- ticket data to ensure correct NFT name stored in the tickets account - 0.5 XLM
+
 ## How does it work?
 
 This contract has 2 parts: `issueTicket` and `generateNFT`
@@ -50,6 +56,7 @@ Relevant in gradient, overflow and symmetrical generation techniques.
 Relevant in symmetrical generation technique.
 
 ## User inputs
+Users can lock in some of the parameters. Locking a parameter costs 5 XLM.
 - **size**
 - **number of colors**
 - **symmetry depth**
